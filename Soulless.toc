@@ -1,0 +1,6 @@
+## Interface: 70100
+## Title : Soulless
+## Notes: The official Soulless addon
+## Author: Sag
+## SavedVariables: FollowMeEnabled
+Soulless.xml
