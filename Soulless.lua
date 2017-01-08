@@ -1,68 +1,4 @@
---[[
-	Split
-		@TODO: Put this in another file somehow?
---]]
-function split(pString, pPattern)
-	local Table = {}  -- NOTE: use {n = 0} in Lua-5.0
-	local fpat = "(.-)" .. pPattern
-	local last_end = 1
-	local s, e, cap = pString:find(fpat, 1)
-	while s do
-		if s ~= 1 or cap ~= "" then
-			table.insert(Table,cap)
-		end
-		
-		last_end = e+1
-		s, e, cap = pString:find(fpat, last_end)
-	end
-	
-	if last_end <= #pString then
-		cap = pString:sub(last_end)
-		table.insert(Table, cap)
-	end
-	
-	return Table
-end
-
-
---[[
-	contains
-		@TODO: Put this in another file somehow? 
---]]
-function contains(table, element)
-	for _, value in pairs(table) do
-		if value == element then
-			return true
-		end
-	end
-	
-	return false
-end
-
-
---[[
-	deepcopy
-		@TODO: Put this in another file somehow?
---]]
-function deepcopy(orig)
-	local orig_type = type(orig)
-	local copy
-	
-	if orig_type == 'table' then
-		copy = {}
-		
-		for orig_key, orig_value in next, orig, nil do
-			copy[deepcopy(orig_key)] = deepcopy(orig_value)
-		end
-		
-		setmetatable(copy, deepcopy(getmetatable(orig)))
-	else -- number, string, boolean, etc
-		copy = orig
-	end
-	
-	return copy
-end
-
+local Utils = require("utils")
 
 --[[ 
 	SoundsDictionary
@@ -218,7 +154,7 @@ end
 local ChannelTable = { "PARTY", "RAID", "OFFICER", "GUILD", "BATTLEGROUND" }
 function SupportedChannel(channel)
 	if channel ~= nil then
-		if contains(ChannelTable, channel) then
+		if Utils.Contains(ChannelTable, channel) then
 			return true
 		else
 			return false
@@ -298,7 +234,7 @@ function DoSendPlaySound(soundname, recipient, ...)
 	
 	for key, SoundEntry in pairs(SoundsDictionary) do
 		soundname = string.lower(soundname)
-		if contains(SoundEntry[SND_NAMES], soundname) then
+		if Utils.Contains(SoundEntry[SND_NAMES], soundname) then
 			return Communicate("PLAYSOUND " .. soundname, recipient)
 		end
 	end
@@ -347,7 +283,7 @@ end
 --]]
 function DoRecvPlaySound(soundname, sender, ...)
 	for key, SoundEntry in pairs(SoundsDictionary) do
-		if contains(SoundEntry[SND_NAMES], soundname) then
+		if Utils.Contains(SoundEntry[SND_NAMES], soundname) then
 			local soundPath = SoundEntry[SND_PATH]
 			PlaySoundFile(soundPath)
 			break
@@ -444,14 +380,14 @@ local CommandDictionary = {
 			FM
 --]]
 function DoSelfMessage(message)
-	local tokens = split(message, " ")
+	local tokens = Utils.Split(message, " ")
 	
 	if #tokens > 0 then
 		local command = string.upper(tokens[1])
 		
 		local foundCommand = false
 		for cmdKey, cmdTable in pairs(CommandDictionary) do
-			if contains(cmdTable[CMD_NAMES], command) then
+			if Utils.Contains(cmdTable[CMD_NAMES], command) then
 				foundCommand = true
 				local func = cmdTable[CMD_SEND_FUNCTION]
 				local success = func(tokens[2], tokens[3], tokens[4], tokens[5], tokens[6])
@@ -485,14 +421,14 @@ function DoIncommingMessage(message, sender, channel)
 	--print("    Sender:  " .. sender)
 	--print("    Channel: " .. channel)
 	
-	local tokens = split(message, " ")
+	local tokens = Utils.Split(message, " ")
 	table.insert(tokens, sender)
 	
 	if #tokens > 0 then
 		local command = string.upper(tokens[1])
 		local foundCommand = false
 		for cmdKey, cmdTable in pairs(CommandDictionary) do
-			if contains(cmdTable[CMD_NAMES], command) then
+			if Utils.Contains(cmdTable[CMD_NAMES], command) then
 				foundCommand = true
 				local func = cmdTable[CMD_RECV_FUNCTION]
 				local success = func(tokens[2], tokens[3], tokens[4], tokens[5], tokens[6])
